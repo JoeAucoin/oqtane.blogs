@@ -30,8 +30,12 @@ namespace Oqtane.Blogs.Repository
         {
             var keywords = searchQuery?.Keywords ?? string.Empty;
             var includeDraft = searchQuery?.IncludeDraft ?? false;
-            var categories = !string.IsNullOrEmpty(searchQuery?.Categories)
-                ? searchQuery.Categories.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(i => Convert.ToInt32(i.Trim()))
+            var categories = !string.IsNullOrWhiteSpace(searchQuery?.Categories)
+                ? searchQuery.Categories
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                    .Where(s => int.TryParse(s, out _))
+                    .Select(int.Parse) // safe now because invalid values were filtered out
+                    .ToList()
                 : null;
             var pageIndex = searchQuery?.PageIndex ?? 0;
             var pageSize = searchQuery?.PageSize;
